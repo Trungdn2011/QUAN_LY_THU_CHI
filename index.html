@@ -23,49 +23,57 @@
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
   <div class="app-wrapper">
-    <!-- ============ SIDEBAR ============ -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
+    <!-- ============ TOP NAVIGATION ============ -->
+    <header class="top-nav" id="top-nav" style="display: none;">
+      <div class="nav-brand">
         <div class="logo-icon">💰</div>
-        <div class="logo-text">
-          <h1>FinanceTrack</h1>
-          <p>Quản lý thu chi cá nhân</p>
-        </div>
+        <h2>FinanceTrack</h2>
       </div>
 
-      <div class="nav-label">Menu chính</div>
-
-      <nav>
-        <div class="nav-item active" data-section="dashboard">
-          <span class="nav-icon">📊</span>
-          Dashboard
+      <nav class="nav-menu">
+        <div class="nav-item" data-section="dashboard">
+          <span class="nav-icon">📊</span> Dashboard
         </div>
         <div class="nav-item" data-section="list">
-          <span class="nav-icon">📋</span>
-          Danh sách giao dịch
+          <span class="nav-icon">📋</span> Giao dịch
         </div>
         <div class="nav-item" data-section="add">
-          <span class="nav-icon">➕</span>
-          Thêm giao dịch
+          <span class="nav-icon">➕</span> Thêm mới
         </div>
       </nav>
 
-      <div class="sidebar-footer">
-        <button class="auth-btn" id="auth-btn" disabled>⏳ Đang khởi tạo...</button>
+      <div class="nav-actions">
         <div class="auth-status">
           <div class="auth-dot" id="auth-dot"></div>
           <span id="auth-status-text">Chưa kết nối</span>
         </div>
+        <button class="auth-btn-small" id="auth-btn-logout">Đăng xuất</button>
       </div>
-    </aside>
+
+      <!-- Mobile Toggle -->
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+    </header>
 
     <!-- ============ MAIN CONTENT ============ -->
     <main class="main-content">
-      <!-- Mobile Menu Button -->
-      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      
+      <!-- ========== LOGIN SCREEN ========== -->
+      <section id="section-login" class="section-panel active login-screen">
+        <div class="login-container">
+          <div class="login-logo">💰</div>
+          <h1>FinanceTrack</h1>
+          <p>Quản lý thu chi cá nhân thông minh qua Google Sheets</p>
+          
+          <div class="login-box">
+            <h3>Đăng nhập để bắt đầu</h3>
+            <p>Vui lòng đăng nhập bằng tài khoản Google có quyền truy cập vào bảng tính của bạn.</p>
+            <button class="auth-btn-large" id="auth-btn-login" disabled>⏳ Đang khởi tạo...</button>
+          </div>
+        </div>
+      </section>
 
       <!-- ========== DASHBOARD ========== -->
-      <section id="section-dashboard" class="section-panel active">
+      <section id="section-dashboard" class="section-panel">
         <div class="page-header">
           <div class="page-title">
             <h2>📊 Dashboard</h2>

@@ -24,9 +24,11 @@ const state = {
 //  DOM REFS
 // ============================================================
 const dom = {
-  authBtn: document.getElementById('auth-btn'),
+  authBtnLogin: document.getElementById('auth-btn-login'),
+  authBtnLogout: document.getElementById('auth-btn-logout'),
   authDot: document.getElementById('auth-dot'),
   authStatus: document.getElementById('auth-status-text'),
+  topNav: document.getElementById('top-nav'),
   loadingOverlay: document.getElementById('loading-overlay'),
   toastContainer: document.getElementById('toast-container'),
 
@@ -99,15 +101,15 @@ function gisLoaded() {
 
 function maybeEnableButtons() {
   if (state.gapiInited && state.gisInited) {
-    dom.authBtn.disabled = false;
-    dom.authBtn.textContent = '🔑 Đăng nhập Google';
+    dom.authBtnLogin.disabled = false;
+    dom.authBtnLogin.textContent = '🔑 Đăng nhập danh tính Google';
   }
 }
 
 // ============================================================
 //  AUTH
 // ============================================================
-function handleAuthClick() {
+function handleAuthLogout() {
   if (state.isSignedIn) {
     google.accounts.oauth2.revoke(gapi.client.getToken().access_token, () => {
       gapi.client.setToken('');
@@ -115,12 +117,18 @@ function handleAuthClick() {
       updateAuthUI(false);
       state.allTransactions = [];
       renderAll();
+      navigateTo('login');
     });
-  } else {
+  }
+}
+
+function handleAuthLogin() {
+  if (!state.isSignedIn) {
     state.tokenClient.callback = async (resp) => {
       if (resp.error !== undefined) { showToast('Đăng nhập thất bại: ' + resp.error, 'error'); return; }
       state.isSignedIn = true;
       updateAuthUI(true);
+      navigateTo('dashboard');
       await loadTransactions();
     };
 
@@ -134,11 +142,9 @@ function handleAuthClick() {
 
 function updateAuthUI(signedIn) {
   if (signedIn) {
-    dom.authBtn.innerHTML = '🚪 Đăng xuất';
     dom.authDot.classList.add('connected');
-    dom.authStatus.textContent = 'Đã kết nối Google';
+    dom.authStatus.textContent = 'Đã kết nối';
   } else {
-    dom.authBtn.innerHTML = '🔑 Đăng nhập Google';
     dom.authDot.classList.remove('connected');
     dom.authStatus.textContent = 'Chưa kết nối';
   }
@@ -588,9 +594,18 @@ function initNav() {
 
 function navigateTo(section) {
   state.currentSection = section;
+  
+  // Show/Hide Top Nav
+  if (section === 'login') {
+    dom.topNav.style.display = 'none';
+  } else {
+    dom.topNav.style.display = 'flex';
+  }
+
   dom.sections.forEach(s => s.classList.toggle('active', s.id === `section-${section}`));
   dom.navItems.forEach(n => n.classList.toggle('active', n.dataset.section === section));
   closeMobileSidebar();
+  
   if (section === 'dashboard') renderDashboard();
   if (section === 'list')      renderList();
 }
@@ -734,13 +749,14 @@ function renderAll() {
 //  INIT
 // ============================================================
 function init() {
-  dom.authBtn.addEventListener('click', handleAuthClick);
+  dom.authBtnLogin.addEventListener('click', handleAuthLogin);
+  dom.authBtnLogout.addEventListener('click', handleAuthLogout);
   initNav();
   initDateFilter();
   initForm();
   initListFilters();
   initMobile();
-  navigateTo('dashboard');
+  navigateTo('login');
 }
 
 document.addEventListener('DOMContentLoaded', init);
