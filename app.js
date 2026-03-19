@@ -29,6 +29,7 @@ const dom = {
   authDot: document.getElementById('auth-dot'),
   authStatus: document.getElementById('auth-status-text'),
   topNav: document.getElementById('top-nav'),
+  fabAddBtn: document.getElementById('fab-add-btn'),
   loadingOverlay: document.getElementById('loading-overlay'),
   toastContainer: document.getElementById('toast-container'),
 
@@ -602,6 +603,13 @@ function navigateTo(section) {
     dom.topNav.style.display = 'flex';
   }
 
+  // Show/Hide FAB
+  if (section === 'dashboard' || section === 'list') {
+    dom.fabAddBtn.style.display = 'flex';
+  } else {
+    dom.fabAddBtn.style.display = 'none';
+  }
+
   dom.sections.forEach(s => s.classList.toggle('active', s.id === `section-${section}`));
   dom.navItems.forEach(n => n.classList.toggle('active', n.dataset.section === section));
   closeMobileSidebar();
@@ -751,6 +759,7 @@ function renderAll() {
 function init() {
   dom.authBtnLogin.addEventListener('click', handleAuthLogin);
   dom.authBtnLogout.addEventListener('click', handleAuthLogout);
+  dom.fabAddBtn.addEventListener('click', () => navigateTo('add'));
   initNav();
   initDateFilter();
   initForm();
