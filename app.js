@@ -372,7 +372,7 @@ function renderBarChart(txns) {
       responsive: true,
       maintainAspectRatio: true,
       plugins: {
-        legend: { labels: { color: '#7986a3', font: { size: 12, family: 'Inter' } } },
+        legend: { labels: { color: '#475569', font: { size: 12, family: 'Inter' } } },
         tooltip: {
           callbacks: {
             label: ctx => ` ${ctx.dataset.label}: ${formatMoney(ctx.raw)}`
@@ -380,8 +380,8 @@ function renderBarChart(txns) {
         }
       },
       scales: {
-        x: { ticks: { color: '#7986a3', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#7986a3', font: { size: 11 }, callback: v => formatMoneyShort(v) }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { ticks: { color: '#475569', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { ticks: { color: '#475569', font: { size: 11 }, callback: v => formatMoneyShort(v) }, grid: { color: 'rgba(0,0,0,0.05)' } },
       },
     },
   });
@@ -419,7 +419,7 @@ function renderPieChart(txns) {
       maintainAspectRatio: true,
       cutout: '65%',
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#7986a3', font: { size: 11 }, padding: 12 } },
+        legend: { position: 'bottom', labels: { color: '#475569', font: { size: 11 }, padding: 12 } },
         tooltip: {
           callbacks: {
             label: ctx => ` ${ctx.label}: ${formatMoney(ctx.raw)}`
@@ -467,12 +467,12 @@ function renderCategoryChart(txns) {
       responsive: true,
       maintainAspectRatio: true,
       plugins: {
-        legend: { labels: { color: '#7986a3', font: { size: 12, family: 'Inter' } } },
+        legend: { labels: { color: '#475569', font: { size: 12, family: 'Inter' } } },
         tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatMoney(ctx.raw)}` } },
       },
       scales: {
-        x: { ticks: { color: '#e8eaf6', font: { size: 12 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#7986a3', callback: v => formatMoneyShort(v) }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { ticks: { color: '#1e293b', font: { size: 12 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { ticks: { color: '#475569', callback: v => formatMoneyShort(v) }, grid: { color: 'rgba(0,0,0,0.05)' } },
       },
     },
   });
@@ -517,12 +517,12 @@ function renderContentChart(txns) {
       maintainAspectRatio: true,
       indexAxis: 'y',
       plugins: {
-        legend: { labels: { color: '#7986a3', font: { size: 12, family: 'Inter' } } },
+        legend: { labels: { color: '#475569', font: { size: 12, family: 'Inter' } } },
         tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatMoney(ctx.raw)}` } },
       },
       scales: {
-        x: { ticks: { color: '#7986a3', callback: v => formatMoneyShort(v) }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#e8eaf6', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        x: { ticks: { color: '#475569', callback: v => formatMoneyShort(v) }, grid: { color: 'rgba(0,0,0,0.05)' } },
+        y: { ticks: { color: '#1e293b', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
       },
     },
   });
