@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản Lý Thu Chi – FinanceTrack</title>
+  <meta name="description" content="Ứng dụng quản lý thu chi cá nhân với Google Sheets, theo dõi thu nhập và chi tiêu hàng ngày." />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Backdrop (mobile) -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <div class="app-wrapper">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">💰</div>
+        <div class="logo-text">
+          <h1>FinanceTrack</h1>
+          <p>Quản lý thu chi cá nhân</p>
+        </div>
+      </div>
+
+      <div class="nav-label">Menu chính</div>
+
+      <nav>
+        <div class="nav-item active" data-section="dashboard">
+          <span class="nav-icon">📊</span>
+          Dashboard
+        </div>
+        <div class="nav-item" data-section="list">
+          <span class="nav-icon">📋</span>
+          Danh sách giao dịch
+        </div>
+        <div class="nav-item" data-section="add">
+          <span class="nav-icon">➕</span>
+          Thêm giao dịch
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="auth-btn" id="auth-btn" disabled>⏳ Đang khởi tạo...</button>
+        <div class="auth-status">
+          <div class="auth-dot" id="auth-dot"></div>
+          <span id="auth-status-text">Chưa kết nối</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN CONTENT ============ -->
+    <main class="main-content">
+      <!-- Mobile Menu Button -->
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+
+      <!-- ========== DASHBOARD ========== -->
+      <section id="section-dashboard" class="section-panel active">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>📊 Dashboard</h2>
+            <p>Tổng quan thu chi theo thời gian</p>
+          </div>
+        </div>
+
+        <!-- Quick Period Tabs -->
+        <div class="period-tabs" style="margin-bottom:16px">
+          <button class="period-tab" data-period="today">Hôm nay</button>
+          <button class="period-tab" data-period="week">Tuần này</button>
+          <button class="period-tab active" data-period="month">Tháng này</button>
+          <button class="period-tab" data-period="quarter">Quý này</button>
+          <button class="period-tab" data-period="year">Năm này</button>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="date-filter-bar" style="margin-bottom:24px; background:var(--bg-card); border:1px solid var(--border); padding:16px; border-radius:var(--radius); flex-wrap:wrap;">
+          <span class="nav-icon">📅</span>
+          <label>Từ ngày:</label>
+          <input type="date" class="date-input" id="dash-date-from" />
+          <label>Đến ngày:</label>
+          <input type="date" class="date-input" id="dash-date-to" />
+          <div class="date-filter-actions">
+            <button class="btn-filter" id="btn-apply-date">Áp dụng</button>
+            <button class="btn-reset" id="btn-reset-date">Xem tất cả</button>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+          <div class="summary-card income">
+            <div class="card-label">
+              <div class="card-icon">⬆️</div>
+              Tổng thu
+            </div>
+            <div class="card-amount" id="total-income">0 ₫</div>
+            <div class="card-sub"><span id="income-count">0</span> giao dịch thu</div>
+          </div>
+
+          <div class="summary-card expense">
+            <div class="card-label">
+              <div class="card-icon">⬇️</div>
+              Tổng chi
+            </div>
+            <div class="card-amount" id="total-expense">0 ₫</div>
+            <div class="card-sub"><span id="expense-count">0</span> giao dịch chi</div>
+          </div>
+
+          <div class="summary-card balance" id="balance-card">
+            <div class="card-label">
+              <div class="card-icon">💼</div>
+              Số dư
+            </div>
+            <div class="card-amount" id="total-balance">0 ₫</div>
+            <div class="card-sub" id="txn-count">0 giao dịch</div>
+          </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>📈 Thu Chi theo ngày</h3>
+            <p>Biểu đồ so sánh thu và chi từng ngày</p>
+            <div class="chart-container" style="height:260px">
+              <canvas id="bar-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>🍩 Chi tiêu theo nội dung</h3>
+            <p>Phân bổ chi tiêu theo nội dung</p>
+            <div class="chart-container" style="height:260px">
+              <canvas id="pie-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="charts-grid" style="margin-bottom:24px">
+          <div class="chart-card">
+            <h3>💳 Thu Chi theo Danh mục</h3>
+            <p>So sánh tiền mặt và chuyển khoản</p>
+            <div class="chart-container" style="height:220px">
+              <canvas id="category-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <h3>🏷️ Thu Chi theo Nội dung</h3>
+            <p>Chi tiết từng khoản thu chi theo nội dung</p>
+            <div class="chart-container" style="height:220px">
+              <canvas id="content-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TRANSACTION LIST ========== -->
+      <section id="section-list" class="section-panel">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>📋 Danh Sách Giao Dịch</h2>
+            <p>Toàn bộ lịch sử thu chi</p>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header">
+            <h3>Giao dịch</h3>
+            <div class="table-filters">
+              <select class="filter-select" id="filter-type">
+                <option value="">Tất cả loại</option>
+                <option value="Thu">Thu</option>
+                <option value="Chi">Chi</option>
+              </select>
+
+              <select class="filter-select" id="filter-content">
+                <option value="">Tất cả nội dung</option>
+                <option value="Ăn uống">🍜 Ăn uống</option>
+                <option value="Cafe">☕ Cafe</option>
+                <option value="Thuốc lá">🚬 Thuốc lá</option>
+                <option value="Nhậu">🍺 Nhậu</option>
+                <option value="Việc gia đình">🏠 Việc gia đình</option>
+                <option value="Lặt vặt">🛒 Lặt vặt</option>
+                <option value="Công việc">💼 Công việc</option>
+              </select>
+
+              <select class="filter-select" id="filter-category">
+                <option value="">Tất cả danh mục</option>
+                <option value="Tiền mặt">💵 Tiền mặt</option>
+                <option value="Chuyển khoản">🏦 Chuyển khoản</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ngày</th>
+                  <th>Loại</th>
+                  <th>Nội dung</th>
+                  <th>Danh mục</th>
+                  <th>Số tiền</th>
+                  <th>Ghi chú</th>
+                  <th>Xóa</th>
+                </tr>
+              </thead>
+              <tbody id="list-table-body">
+                <tr><td colspan="7">
+                  <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>Đăng nhập Google để tải dữ liệu</p>
+                  </div>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== ADD TRANSACTION ========== -->
+      <section id="section-add" class="section-panel">
+        <div class="page-header">
+          <div class="page-title">
+            <h2>➕ Thêm Giao Dịch</h2>
+            <p>Ghi nhận thu nhập hoặc chi tiêu mới</p>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h3 id="form-title">💰 Thêm giao dịch mới</h3>
+          <p id="form-subtitle">Điền đầy đủ thông tin và nhấn Lưu để ghi vào Google Sheet</p>
+
+          <div class="form-grid">
+            <!-- Phân loại -->
+            <div class="form-group">
+              <label for="form-type">⚖️ Phân loại</label>
+              <select class="form-select" id="form-type">
+                <option value="Chi">Chi</option>
+                <option value="Thu">Thu</option>
+              </select>
+            </div>
+            <!-- Ngày -->
+            <div class="form-group">
+              <label for="form-date">📅 Ngày</label>
+              <input type="date" class="form-input" id="form-date" />
+            </div>
+
+            <!-- Số tiền -->
+            <div class="form-group">
+              <label for="form-amount">💵 Số tiền (VNĐ)</label>
+              <input
+                type="number"
+                class="form-input"
+                id="form-amount"
+                placeholder="Nhập số tiền..."
+                min="0"
+                step="1000"
+              />
+            </div>
+
+            <!-- Nội dung -->
+            <div class="form-group">
+              <label for="form-content">🏷️ Nội dung</label>
+              <select class="form-select" id="form-content">
+                <option value="">-- Chọn nội dung --</option>
+                <option value="Ăn uống">🍜 Ăn uống</option>
+                <option value="Cafe">☕ Cafe</option>
+                <option value="Thuốc lá">🚬 Thuốc lá</option>
+                <option value="Nhậu">🍺 Nhậu</option>
+                <option value="Việc gia đình">🏠 Việc gia đình</option>
+                <option value="Lặt vặt">🛒 Lặt vặt</option>
+                <option value="Công việc">💼 Công việc</option>
+              </select>
+            </div>
+
+            <!-- Danh mục -->
+            <div class="form-group">
+              <label for="form-category">💳 Danh mục thanh toán</label>
+              <select class="form-select" id="form-category">
+                <option value="">-- Chọn danh mục --</option>
+                <option value="Tiền mặt">💵 Tiền mặt</option>
+                <option value="Chuyển khoản">🏦 Chuyển khoản</option>
+              </select>
+            </div>
+
+            <!-- Ghi chú -->
+            <div class="form-group full">
+              <label for="form-note">📝 Ghi chú (tùy chọn)</label>
+              <textarea
+                class="form-textarea"
+                id="form-note"
+                placeholder="Ghi chú thêm về giao dịch này..."
+              ></textarea>
+            </div>
+          </div>
+
+          <button class="btn-submit" id="btn-submit-form">
+            💾 Lưu giao dịch
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Google APIs -->
+  <script src="config.js"></script>
+  <script async defer
+    src="https://apis.google.com/js/api.js"
+    onload="gapiLoaded()">
+  </script>
+  <script async defer
+    src="https://accounts.google.com/gsi/client"
+    onload="gisLoaded()">
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>
